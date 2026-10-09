@@ -1,0 +1,170 @@
+{
+  "project": "Floor Plan Extraction Template",
+  "description": "Configuration template for CAD floor plan parsing - customize to your layer names",
+  "cad_file": "floorplan.dxf",
+  "settings": {
+    "wall_thickness_m": 0.15,
+    "door_width_m": 0.9,
+    "door_height_m": 2.1,
+    "window_width_m": 1.2,
+    "window_height_m": 1.5,
+    "min_room_area_m2": 0.5,
+    "proximity_distance_m": 1.0
+  },
+  "layers": {
+    "walls": {
+      "enabled": true,
+      "layer_names": ["WALL", "WALLS", "Wall-Outline", "0"],
+      "entity_types": ["LINE", "LWPOLYLINE", "POLYLINE"],
+      "description": "Wall outlines and centerlines",
+      "visualization": {
+        "color": 1,
+        "lineweight": 35,
+        "linetype": "CONTINUOUS"
+      }
+    },
+    "room_boundaries": {
+      "enabled": true,
+      "layer_names": ["ROOM-BOUNDARY", "SPACE", "AREAS", "ROOM", "SPACES"],
+      "entity_types": ["LWPOLYLINE", "POLYLINE"],
+      "description": "Closed polygons defining room spaces - REQUIRED",
+      "required": true,
+      "visualization": {
+        "color": 5,
+        "lineweight": 50,
+        "linetype": "CONTINUOUS"
+      }
+    },
+    "doors": {
+      "enabled": true,
+      "layer_names": ["DOOR", "DOORS", "DOR", "DOOR-SYMBOL"],
+      "entity_types": ["INSERT"],
+      "block_keywords": ["DOOR", "DOR", "SWINGDOOR", "DOUBLEDR", "POCKETDR", "BIFOLD"],
+      "description": "Door block inserts with attributes",
+      "visualization": {
+        "color": 2,
+        "lineweight": 25,
+        "linetype": "CONTINUOUS"
+      }
+    },
+    "windows": {
+      "enabled": true,
+      "layer_names": ["WINDOW", "WINDOWS", "WIN", "WDW"],
+      "entity_types": ["INSERT"],
+      "block_keywords": ["WINDOW", "WIN", "WDW", "GLASS", "CASEMENT", "AWNING"],
+      "description": "Window block inserts",
+      "visualization": {
+        "color": 4,
+        "lineweight": 25,
+        "linetype": "CONTINUOUS"
+      }
+    },
+    "levels": {
+      "enabled": true,
+      "layer_names": ["LEVEL", "LEVELS", "ELEV", "STORY", "FLOOR"],
+      "entity_types": ["TEXT", "INSERT"],
+      "block_keywords": ["LEVEL", "LEVEL_TAG", "LEVEL_NAME"],
+      "description": "Floor level indicators and tags",
+      "visualization": {
+        "color": 3,
+        "lineweight": 15,
+        "linetype": "CONTINUOUS"
+      }
+    },
+    "text_labels": {
+      "enabled": true,
+      "layer_names": ["TEXT", "LABELS", "ANNOT", "ANNOTATION"],
+      "entity_types": ["TEXT", "MTEXT"],
+      "description": "Room names, annotations, text labels",
+      "visualization": {
+        "color": 7,
+        "lineweight": 0,
+        "linetype": "CONTINUOUS"
+      }
+    },
+    "dimensions": {
+      "enabled": true,
+      "layer_names": ["DIMENSIONS", "DIMS", "DIM", "DIMENSION"],
+      "entity_types": ["DIMENSION"],
+      "description": "Dimension text and values",
+      "visualization": {
+        "color": 6,
+        "lineweight": 15,
+        "linetype": "CONTINUOUS"
+      }
+    },
+    "furniture": {
+      "enabled": false,
+      "layer_names": ["FURNITURE", "FURN", "DESK", "FF&E"],
+      "entity_types": ["INSERT"],
+      "block_keywords": ["FURNITURE", "FURN", "DESK", "TABLE", "CHAIR"],
+      "description": "Furniture and fixtures (optional)",
+      "visualization": {
+        "color": 8,
+        "lineweight": 10,
+        "linetype": "CONTINUOUS"
+      }
+    }
+  },
+  "extraction_rules": {
+    "room_identification": {
+      "method": "closed_polyline",
+      "source_layer": "room_boundaries",
+      "min_area_m2": 0.5,
+      "auto_id": true,
+      "description": "Identify rooms from closed polylines"
+    },
+    "wall_calculation": {
+      "method": "perimeter_based",
+      "thickness_m": 0.15,
+      "deduct_doors": true,
+      "deduct_windows": true,
+      "description": "Calculate wall area from perimeter"
+    },
+    "door_window_deduction": {
+      "proximity_distance_m": 1.0,
+      "use_block_attributes": true,
+      "fallback_to_defaults": true,
+      "description": "Match doors/windows to rooms by proximity"
+    },
+    "level_assignment": {
+      "method": "text_nearest_room",
+      "default_level": "Ground",
+      "description": "Assign floor level to each room"
+    },
+    "room_naming": {
+      "method": "text_inside_or_block_attribute",
+      "fallback_pattern": "Room_{id}",
+      "description": "Name rooms from text or attributes"
+    }
+  },
+  "validation": {
+    "check_missing_layers": true,
+    "check_empty_layers": true,
+    "check_geometry_validity": true,
+    "check_duplicate_ids": true,
+    "check_zero_area": true,
+    "check_overlapping_rooms": false,
+    "check_unmatched_blocks": true,
+    "check_missing_attributes": true,
+    "generate_error_report": true
+  },
+  "output_options": {
+    "excel_sheets": [
+      "Room_Breakdown",
+      "Room_Validation",
+      "Error_Log",
+      "Warnings",
+      "Doors",
+      "Windows",
+      "Levels",
+      "Text_Labels",
+      "Dimensions",
+      "Summary"
+    ],
+    "create_visualization_dxf": true,
+    "create_error_log_txt": true,
+    "include_validation": true,
+    "precision_decimals": 2
+  }
+}
